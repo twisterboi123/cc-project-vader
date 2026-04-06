@@ -35,7 +35,7 @@ const commands = [
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
-// ===== REGISTER COMMANDS =====
+// ===== REGISTER =====
 (async () => {
   try {
     console.log('Registering commands...');
@@ -66,7 +66,7 @@ client.on('interactionCreate', async interaction => {
 
     const link = interaction.options.getString('link');
 
-    // only TikTok links
+    // TikTok only
     if (!link.includes("tiktok.com")) {
       return interaction.reply({
         content: "❌ only TikTok links allowed",
@@ -76,11 +76,20 @@ client.on('interactionCreate', async interaction => {
 
     const creatorRole = interaction.guild.roles.cache.get(process.env.CREATOR_ROLE_ID);
     const pingRole = interaction.guild.roles.cache.get(process.env.PING_ROLE_ID);
+    const channel = interaction.guild.channels.cache.get(process.env.CHANNEL_ID);
 
     // check creator role
     if (!creatorRole || !interaction.member.roles.cache.has(creatorRole.id)) {
       return interaction.reply({
-        content: "❌ you are not a content creator",
+        content: "❌ sorry you need the content creator role for that",
+        ephemeral: true
+      });
+    }
+
+    // check channel exists
+    if (!channel) {
+      return interaction.reply({
+        content: "❌ channel not set correctly",
         ephemeral: true
       });
     }
@@ -97,7 +106,7 @@ client.on('interactionCreate', async interaction => {
       .setFooter({ text: "Project Vader" })
       .setTimestamp();
 
-    await interaction.channel.send({
+    await channel.send({
       content: `<@&${pingRole.id}>`,
       embeds: [embed]
     });
@@ -108,12 +117,13 @@ client.on('interactionCreate', async interaction => {
     });
   }
 
-  // ===== ADMIN TEST =====
+  // ===== TEST (ADMIN ONLY) =====
   if (interaction.commandName === 'test') {
+
     const embed = new EmbedBuilder()
       .setColor(0x00ff99)
       .setTitle("🧪 Test")
-      .setDescription("bot working ✅")
+      .setDescription("bot working perfectly ✅")
       .setTimestamp();
 
     await interaction.reply({
